@@ -1,0 +1,11 @@
+#!/bin/sh
+_REQUIRED_ARGUMENTS="_ZFS_VOLUME:ZFS Volume to update|_ZFS_ZAP_SCHEDULE:daily,weekly,monthly|_ZFS_ZAP_TTL:30d,1y,10y"
+
+import /lib/zfs.sh
+
+# https://ftfl.ca/blog/2016-12-27-zfs-replication.html
+zfs set zap:snap=on $_ZFS_VOLUME
+zfs set zap:backup=$_ZFS_ZAP_SCHEDULE $_ZFS_VOLUME
+zfs set zap:ttl=$_ZFS_ZAP_TTL $_ZFS_VOLUME
+
+zfs allow -u $_CONF_SYSTEM_MAINTENANCE_ZFS_USER bookmark,diff,hold,send,snapshot $_ZFS_VOLUME

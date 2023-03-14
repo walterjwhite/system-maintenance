@@ -1,0 +1,12 @@
+#!/bin/sh
+
+import /lib/alert.sh
+import /lib/update-system
+import /lib/jail.sh
+import /lib/network.sh
+
+_in_jail && _error "Update System is not designed to run inside jails, aborting"
+
+_wait_network
+_patch_physical
+_patch_jails

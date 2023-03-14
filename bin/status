@@ -1,0 +1,24 @@
+#!/bin/sh
+
+import /lib/alert.sh
+
+# all logs go to logfile
+# errors go to stderr / beep / email?
+# if no errors, no output
+# disk status (free space)
+# ZFS status (errors)
+# service status
+for _SYSTEM_MAINTENANCE_MODULE in $(find _LIBRARY_PATH_/_APPLICATION_NAME_/status -type f); do
+	_SYSTEM_MAINTENANCE_MODULE_NAME=$(basename $_SYSTEM_MAINTENANCE_MODULE | sed -e 's/\.sh//')
+
+	_is_feature_enabled "$_SYSTEM_MAINTENANCE_MODULE_NAME" || continue
+
+	_info "Running: $_SYSTEM_MAINTENANCE_MODULE_NAME"
+	. $_SYSTEM_MAINTENANCE_MODULE
+
+	_SYSTEM_MAINTENANCE_MODULE_FUNCTION=$(printf '%s' "$_SYSTEM_MAINTENANCE_MODULE_NAME" | tr '-' '_')
+	_$_SYSTEM_MAINTENANCE_MODULE_FUNCTION
+
+	[ "$_STATUS_MESSAGE" ] && _system_alert "$_SYSTEM_MAINTENANCE_MODULE_NAME" "$_STATUS_MESSAGE"
+	unset _STATUS_MESSAGE
+done

@@ -1,0 +1,4 @@
+#!/bin/sh
+
+. ~/.config/walterjwhite/system-maintenance
+timeout $_CONF_SYSTEM_MAINTENANCE_UPDATE_SYSTEM_TIMEOUT update-system

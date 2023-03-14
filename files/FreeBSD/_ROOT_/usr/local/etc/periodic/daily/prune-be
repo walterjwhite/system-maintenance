@@ -1,0 +1,4 @@
+#!/bin/sh
+
+. ~/.config/walterjwhite/system-maintenance
+timeout $_CONF_SYSTEM_MAINTENANCE_PRUNE_BE_TIMEOUT prune-be

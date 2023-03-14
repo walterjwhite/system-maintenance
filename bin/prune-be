@@ -1,0 +1,16 @@
+#!/bin/sh
+
+import git:install/lib/time.sh
+import /lib/jail.sh
+import /lib/prune-be
+
+_in_jail && _error "Update System is not designed to run inside jails, aborting"
+
+_CURRENT_EPOCH_TIME=$(date "+%s")
+
+_prune_be_by_age
+_prune_be_by_number
+
+# prune snapshots for jails
+_prune_jail_snapshot_by_age
+_prune_jail_snapshot_by_number
