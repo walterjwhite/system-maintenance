@@ -1,0 +1,12 @@
+1. check if updates nightly
+    freebsd-update fetch install
+    pkg update
+    pkg upgrade
+    pkg audit -F -q
+
+2. if so, automatically create BE, ask user to reboot into new BE
+3. on bootup, apply patches
+4. check for additional updates, repeat
+5. automatically prune old BE / patches and recycle #'s
+
+https://forums.freebsd.org/threads/how-to-properly-update-a-system.83844/#post-553044

@@ -1,0 +1,12 @@
+#!/bin/sh
+
+_info "clearing user sessions"
+
+pkill -j none Xorg
+pkill -j none ssh-agent
+
+who | awk {'print$1'} | xargs -L 1 -I _USER_ pkill -j none -u _USER_
+
+who | awk {'print$2'} | xargs -L 1 -I _TTY_ pkill -j none -t _TTY_
+
+_info "cleared user sessions"
