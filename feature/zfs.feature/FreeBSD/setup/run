@@ -1,0 +1,3 @@
+#!/bin/sh
+
+_sudo chmod +x /usr/local/etc/periodic/*/*

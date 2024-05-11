@@ -1,0 +1,17 @@
+#!/bin/sh
+
+import service.sh
+import git:install/extension.sh
+import git:install/root.sh
+
+_require_root
+
+_ACTION=live
+[ $# -gt 0 ] && _ACTION=off
+
+_info "Making system $_ACTION"
+
+_EXTENSION_FUNCTION_SUFFIX=_${_ACTION}
+extension_path=/usr/local/etc/walterjwhite/live _run_extensions
+
+_info "System is $_ACTION"
