@@ -1,0 +1,11 @@
+#!/bin/sh
+
+import alert.sh
+import jail.sh
+import network.sh
+import feature/host.feature/update-system
+
+_in_jail && _error "Update System is not designed to run inside jails, aborting"
+
+_patch_physical
+_patch_jails

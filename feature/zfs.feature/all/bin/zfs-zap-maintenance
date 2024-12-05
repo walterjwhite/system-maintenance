@@ -1,0 +1,46 @@
+#!/bin/sh
+
+import jail.sh
+import feature/zfs.feature/zfs.sh
+
+_ZAP_SNAPSHOT_INTERVAL=$1
+shift
+
+_REQUIRE_DETAILED_MESSAGE="one of (daily|weekly|monthly)" _require "$_ZAP_SNAPSHOT_INTERVAL" _ZAP_SNAPSHOT_INTERVAL
+
+_info "$_ZAP_SNAPSHOT_INTERVAL"
+
+_ZFS_ZAP_SNAPSHOT_TAKEN=0
+
+for _ZFS_VOLUME in $(zfs list -H | awk {'print$1'}); do
+	_zfs_get_property zap:snap $_ZFS_VOLUME | grep -cq on || continue
+	_zfs_is_volume_jailed && continue
+
+	_ZAP_BACKUP_SCHEDULE=$(_zfs_get_property zap:backup $_ZFS_VOLUME)
+
+	case $_ZAP_BACKUP_SCHEDULE in
+	$_ZAP_SNAPSHOT_INTERVAL)
+		_ZAP_SNAPSHOT_TTL=$(_zfs_get_property zap:ttl $_ZFS_VOLUME)
+
+		_detail "taking snapshot: $_ZFS_VOLUME @ $_ZAP_SNAPSHOT_TTL ($_ZAP_BACKUP_SCHEDULE)"
+		zap snap -v $_ZAP_SNAPSHOT_TTL $_ZFS_VOLUME 2>&1
+		_ZFS_ZAP_SNAPSHOT_TAKEN=$(($_ZFS_ZAP_SNAPSHOT_TAKEN + 1))
+		;;
+	-)
+		_debug "not backing up: $_ZFS_VOLUME - (Not Scheduled)"
+		;;
+	*)
+		_warn "not backing up: $_ZFS_VOLUME - (Unmatched Backup Schedule: $_ZAP_BACKUP_SCHEDULE != $_ZAP_SNAPSHOT_INTERVAL)"
+		;;
+	esac
+done
+
+if [ $_ZFS_ZAP_SNAPSHOT_TAKEN -gt 0 ]; then
+	unset host
+
+	_info "replicating snapshots"
+	zap rep -v 2>&1
+fi
+
+_info "destroying expired snapshots"
+zap destroy -v 2>&1

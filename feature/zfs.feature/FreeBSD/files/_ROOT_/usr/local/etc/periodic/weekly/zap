@@ -1,0 +1,3 @@
+#!/bin/sh
+
+zfs-zap-maintenance weekly

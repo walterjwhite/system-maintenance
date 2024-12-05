@@ -1,0 +1,10 @@
+#!/bin/sh
+
+import jail.sh
+
+_in_jail && _error "Update System is not designed to run inside jails, aborting"
+
+_info "scrubbing ZFS pools"
+zpool list -H |
+	awk {'print$1'} |
+	xargs zpool scrub

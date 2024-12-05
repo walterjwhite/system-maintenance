@@ -1,0 +1,34 @@
+#!/bin/sh
+
+import jail.sh
+import feature/zfs.feature/zfs.sh
+
+for _ZFS_VOLUME in $(zfs list -H | awk {'print$1'}); do
+	_RCLONE_TARGET=$(_zfs_get_property rclone:target $_ZFS_VOLUME)
+
+	if [ "$_RCLONE_TARGET" = "-" ]; then
+		continue
+	fi
+
+	_zfs_is_volume_jailed && continue
+
+	_info "rclone - [$_RCLONE_TARGET]"
+	_RCLONE_PATH=$(_zfs_get_property rclone:path $_ZFS_VOLUME)
+	_ZFS_LATEST_SNAPSHOT=$(zfs list -t snapshot $_ZFS_VOLUME | tail -1 | awk {'print$1'})
+	if [ -z "$_ZFS_LATEST_SNAPSHOT" ]; then
+		continue
+	fi
+
+	_info "rclone - $_RCLONE_TARGET | $_RCLONE_PATH | $_ZFS_LATEST_SNAPSHOT"
+	_ZFS_TARGET_SNAPSHOT_FILE=$_CONF_SYSTEM_MAINTENANCE_ZFS_BACKUP_PATH/$_ZFS_VOLUME.snapshot
+
+	mkdir -p $(dirname $_ZFS_TARGET_SNAPSHOT_FILE)
+	_detail "rclone - writing snapshot to file @ $_ZFS_TARGET_SNAPSHOT_FILE"
+	zfs send $_ZFS_LATEST_SNAPSHOT >$_ZFS_TARGET_SNAPSHOT_FILE
+
+	_detail "rclone - uploading file to $_RCLONE_TARGET:$_RCLONE_PATH"
+	rclone copy $_ZFS_TARGET_SNAPSHOT_FILE $_RCLONE_TARGET:$_RCLONE_PATH
+	_detail "rclone - uploaded file to $_RCLONE_TARGET:$_RCLONE_PATH"
+
+	rm -f $_ZFS_TARGET_SNAPSHOT_FILE
+done

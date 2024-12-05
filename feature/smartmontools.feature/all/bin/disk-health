@@ -1,0 +1,10 @@
+#!/bin/sh
+
+import .
+
+for _device in $(_smartmontools_get_devices); do
+	_info "Fetching SMART status for: $_device"
+	smartctl -x _device
+
+	printf '\n\n'
+done
